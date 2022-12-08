@@ -9,8 +9,8 @@ when compileOption("mm", "refc"):
 
 type
   Text = seq[Rune]
-  Record = seq[int]
-  History = seq[Record]
+  Pattern = seq[int]
+  History = seq[Pattern]
 
 # --- utils
 
@@ -22,7 +22,7 @@ iterator rpairs[T](s: openArray[T]): (int, T) =
   for i in countdown(s.high, 0):
     yield (i, s[i])
 
-func toLog(r: Record): string =
+func toLog(r: Pattern): string =
   for i in r:
     result.add $i
     result.add ' '
@@ -42,29 +42,29 @@ proc genHistory(len, number: int): History =
     result.add indexSeq.dup shuffle
 
 
-func build1(t: Text, rec: Record): Text = 
+func build1(t: Text, patt: Pattern): Text =
   result.setLen t.len
-  
-  for i, v in rec:
+
+  for i, v in patt:
     result[i] = t[v]
 
-func build(t: Text, records: History): Text =
+func build(t: Text, Patterns: History): Text =
   result = t
 
-  for r in records:
+  for r in Patterns:
     result = build1(result, r)
-    
 
-func solve1(t: Text, rec: Record): Text = 
+
+func solve1(t: Text, patt: Pattern): Text =
   result.setLen t.len
 
-  for i, v in rec:
+  for i, v in patt:
     result[v] = t[i]
 
-func solve(final: Text, records: History): Text =
+func solve(final: Text, Patterns: History): Text =
   result = final
 
-  for r in records.ritems:
+  for r in Patterns.ritems:
     result = solve1(result, r)
 
 # --- test
@@ -81,10 +81,10 @@ suite "tests":
 
   test "generate & solve n":
     let
-      records = genHistory("hello".len, 10)
-      final = build("hello".toRunes, records)
+      patterns = genHistory("hello".len, 10)
+      final = build("hello".toRunes, patterns)
 
-    check solve(final, records) == "hello".toRunes
+    check solve(final, patterns) == "hello".toRunes
 
 
 when isMainModule:

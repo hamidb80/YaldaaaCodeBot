@@ -2,8 +2,8 @@ import telebot
 
 when false:
   @admin:
-    /count
-    /addpoet
+    /stats -> (answered, used/all)
+    /addpoet [poet]
     /backup
 
   @user:
@@ -29,4 +29,3 @@ when false:
         else:
           -> "no dear, that's not the answer"
           continue loop
-        

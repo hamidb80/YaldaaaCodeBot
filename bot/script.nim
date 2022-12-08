@@ -1,5 +1,30 @@
 
 when false:
+  
+  Database:
+    User:
+      id 
+      username
+      firstname
+      lastname
+      contact_info
+
+    Puzzles:
+      id
+      initial
+      log
+      final
+      
+      assigned_to
+
+    Answers:
+      user_id
+      puzzle_id
+      input
+      time
+      is_correct
+
+
   /start
   -> "hello, do you wanna attend 'Ya1daaa C0de'?"
 

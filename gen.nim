@@ -2,6 +2,9 @@ import std/[sequtils, strutils, unicode, random, sugar, unittest]
 
 randomize()
 
+when compileOption("mm", "refc"):
+  {.fatal: "use ARC or ORC".}
+
 # --- defs
 
 type
@@ -38,21 +41,31 @@ proc genHistory(len, number: int): History =
   for _ in 1..number:
     result.add indexSeq.dup shuffle
 
-func build(sentence: Text, records: History): Text =
-  result = sentence
+
+func build1(t: Text, rec: Record): Text = 
+  result.setLen t.len
+  
+  for i, v in rec:
+    result[i] = t[v]
+
+func build(t: Text, records: History): Text =
+  result = t
 
   for r in records:
-    var acc = result
-    for i, v in r:
-      result[i] = acc[v]
+    result = build1(result, r)
+    
+
+func solve1(t: Text, rec: Record): Text = 
+  result.setLen t.len
+
+  for i, v in rec:
+    result[v] = t[i]
 
 func solve(final: Text, records: History): Text =
   result = final
 
   for r in records.ritems:
-    let acc = result
-    for i, v in r:
-      result[v] = acc[i]
+    result = solve1(result, r)
 
 # --- test
 

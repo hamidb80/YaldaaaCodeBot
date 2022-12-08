@@ -1,25 +1,32 @@
 import telebot
 
 when false:
-  /start
-  -> greeting
+  @admin:
+    /count
+    /addpoet
+    /backup
 
-  block loop:
-    case [senMyInputs, wannaAnswer]
-    of 1:
-      -> user.puzzle.shuffled
-      -> user.puzzle.logs
+  @user:
+    /start
+    -> greeting
 
-    of 2:
-      -> doubtSolvedProblemD
-      -> sendToProveD
+    block loop:
+      case [senMyInputs, wannaAnswer]
+      of 1:
+        -> user.puzzle.shuffled
+        -> user.puzzle.logs
 
-      if msg.removeSpaces == user.puzzle.initial.removeSpaces:
-        -> congratsD
-        -> weWillInformYou
+      of 2:
+        -> doubtSolvedProblemD
+        -> sendToProveD
 
-        break loop
+        if msg.removeSpaces == user.puzzle.initial.removeSpaces:
+          -> congratsD
+          -> weWillInformYou
 
-      else:
-        -> "no dear, that's not the answer"
-        continue loop
+          break loop
+
+        else:
+          -> "no dear, that's not the answer"
+          continue loop
+        

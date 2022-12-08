@@ -5,19 +5,19 @@ import ndb/sqlite as ns
 
 
 type
-  State = enum
+  Conversation = enum
     initial
     problem
     answer
     won
-
 
   User* = ref object of Model
     tgid*: int
     username*: string
     firstname*: string
     lastname*: string
-    state*: State
+    is_admin*: bool
+    conversation*: Conversation
 
   Puzzle* = ref object of Model
     initial*: string
@@ -43,6 +43,6 @@ let db = getDb()
 
 # TODO pooling
 
-var u1 = User(state: initial)
+var u1 = User(conversation: initial)
 db.createTables(Answer(user: User(), puzzle: Puzzle()))
 db.insert(u1)

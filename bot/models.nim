@@ -5,7 +5,7 @@ import ndb/sqlite as ns
 
 
 type
-  Conversation = enum
+  UserState = enum
     initial
     problem
     answer
@@ -17,7 +17,7 @@ type
     firstname*: string
     lastname*: string
     is_admin*: bool
-    conversation*: Conversation
+    state*: UserState
 
   Puzzle* = ref object of Model
     initial*: string
@@ -27,7 +27,6 @@ type
 
   Answer* = ref object of Model
     user*: User
-    puzzle*: Puzzle
     input*: string
     timestamp*: Datetime
     is_correct*: bool
@@ -38,11 +37,11 @@ func dbValue*(val: enum): DbValue = dbValue val.int
 func to*(dbVal: DbValue, T: typedesc[enum]): T = dbVal.i.T
 
 
-putEnv("DB_HOST", "./test.db")
-let db = getDb()
+when isMainModule:
+  withDb:
+    db.createTables(Answer(user: User()))
+    db.createTables(Puzzle())
 
-# TODO pooling
-
-var u1 = User(conversation: initial)
-db.createTables(Answer(user: User(), puzzle: Puzzle()))
-db.insert(u1)
+  var u1 = User(state: initial)
+  withDb:
+    db.insert(u1)

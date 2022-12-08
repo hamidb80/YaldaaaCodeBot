@@ -4,6 +4,7 @@ when false:
   @admin:
     /stats -> (answered, used/all)
     /addpoet [poet]
+    /reset [tgid]
     /backup
 
   @user:

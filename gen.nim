@@ -48,11 +48,11 @@ func build1(t: Text, patt: Pattern): Text =
   for i, v in patt:
     result[i] = t[v]
 
-func build(t: Text, Patterns: History): Text =
+func build(t: Text, patterns: History): Text =
   result = t
 
-  for r in Patterns:
-    result = build1(result, r)
+  for p in patterns:
+    result = build1(result, p)
 
 
 func solve1(t: Text, patt: Pattern): Text =
@@ -61,10 +61,10 @@ func solve1(t: Text, patt: Pattern): Text =
   for i, v in patt:
     result[v] = t[i]
 
-func solve(final: Text, Patterns: History): Text =
+func solve(final: Text, patterns: History): Text =
   result = final
 
-  for r in Patterns.ritems:
+  for r in patterns.ritems:
     result = solve1(result, r)
 
 # --- test

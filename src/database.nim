@@ -2,6 +2,7 @@ import std/[times, strutils, os, options]
 import norm/[model, sqlite, pragmas]
 import problem
 
+# --- models
 
 type
   UserState = enum
@@ -29,16 +30,25 @@ type
     timestamp*: Datetime
     is_correct*: bool
 
+# --- support for enum field
 
 func dbType*(T: typedesc[enum]): string = "INTEGER"
 func dbValue*(val: enum): DbValue = dbValue val.int
 func to*(dbVal: DbValue, T: typedesc[enum]): T = dbVal.i.T
+
+# --- aliases
 
 template `||`(code): untyped =
   withDb code
 
 proc update*[M: Model](u: M) =
   || db.update u
+
+# --- actions
+
+proc addUser*(tgid: int): User =
+  # TODO
+  discard
 
 proc getUser*(tgid: int): User =
   result = User()
@@ -69,6 +79,7 @@ proc getPuzzlesStats*: tuple[answered, free, total: int64] =
     result.free = db.count(Puzzle, "1", false, "assigned_to == NULL")
     result.total = db.count(Puzzle)
 
+# -- test
 
 when isMainModule:
   putEnv("DB_HOST", "./test.db")

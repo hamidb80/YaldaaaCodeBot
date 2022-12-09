@@ -10,5 +10,8 @@ spec:
   - name: TG_BOT_API_KEY
     secret: TG_BOT_API_TOKEN
 
-  - name: STORAGE
+    - name: AUTHOR_CHAT_ID
+    value: "101862091"
+    
+    - name: STORAGE
     value: "/mnt/shared-volume/"

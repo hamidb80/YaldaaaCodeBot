@@ -2,6 +2,7 @@ import std/[times, strutils, options]
 import norm/[model, sqlite, pragmas]
 import problem, tg
 
+# --- types
 
 type
   Stats* = tuple
@@ -17,7 +18,7 @@ type
     usWon
 
   User* = ref object of Model
-    tgid* {.unique.}: int64
+    chatid* {.unique.}: int64
     username*: string
     firstname*: string
     lastname*: string
@@ -41,6 +42,12 @@ func dbType*(T: typedesc[enum]): string = "INTEGER"
 func dbValue*(val: enum): DbValue = dbValue val.int
 func to*(dbVal: DbValue, T: typedesc[enum]): T = dbVal.i.T
 
+# --- utils
+
+proc genPuzzle*(poet: string): Puzzle = 
+  let (final, logs) = generateProblem(poet, 80 .. 100)
+  Puzzle(initial: poet, logs: reprLogs logs, shuffled: final)
+
 # --- aliases
 
 template `||`(code): untyped =
@@ -59,13 +66,13 @@ proc remove*[M: Model](instance: sink M) =
 
 # --- actions
 
-proc getUser*(tgid: int64): User =
+proc getUser*(chatid: int64): User =
   result = User()
-  || db.select(result, "tgid == ?", tgid)
+  || db.select(result, "chatid == ?", chatid)
 
 proc addUser*(tid: int64, u, f, l: string): User =
   result = User(
-    tgid: tid,
+    chatid: tid,
     username: u,
     firstname: f,
     lastname: l,
@@ -74,19 +81,18 @@ proc addUser*(tid: int64, u, f, l: string): User =
 
   || db.insert result
 
-proc addOrGetUser*(tgid: int64, u, f, l: string): User =
+proc addOrGetUser*(chatid: int64, u, f, l: string): User =
   try:
-    getUser(tgid)
+    getUser(chatid)
   except NotFoundError:
-    addUser(tgid, u, f, l)
+    addUser(chatid, u, f, l)
 
 proc addOrGetUser*(tu: TgUserInfo): User =
   addOrGetUser(tu.chatid,
     tu.username, tu.firstname, tu.lastname)
 
 proc addPuzzle*(poet: string): Puzzle =
-  let (final, logs) = generateProblem(poet, 80 .. 100)
-  result = Puzzle(initial: poet, logs: reprLogs logs, shuffled: final)
+  result = genPuzzle poet
   || db.insert result
 
 proc getNewPuzzle*: Puzzle =

@@ -9,7 +9,7 @@ proc begin(bot: TeleBot, c: Chat): Future[void] {.async, gcsafe.} =
 
   case u.state
   of usInitial:
-    u.tgid << greetingD ++ problemK
+    u.chatid << greetingD ++ problemK
 
     var p = getNewPuzzle()
     p.assigned_to = some u
@@ -17,7 +17,7 @@ proc begin(bot: TeleBot, c: Chat): Future[void] {.async, gcsafe.} =
     update p
 
   else:
-    u.tgid << youAttendedBeforeD
+    u.chatid << youAttendedBeforeD
 
 proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe.} =
   result = true
@@ -30,28 +30,28 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe
   if u.isAdmin:
     case c.command
     of $acCommandslist:
-      u.tgid << adminCommandsD
+      u.chatid << adminCommandsD
 
     of $acStats:
-      u.tgid << reprStats getStats()
+      u.chatid << reprStats getStats()
 
     of $acAddpoet:
       if isValidPoet c.params:
         discard addPuzzle c.params.strip
-        u.tgid << savedD
+        u.chatid << savedD
       else:
-        u.tgid << poetFormatAlertD
+        u.chatid << poetFormatAlertD
 
     of $acReset:
       # TODO error handling for parsing invlid int
       resetUser getUser(parseInt c.params)
-      u.tgid << resetedD
+      u.chatid << resetedD
 
     of $acBackup:
-      u.tgid << "not implemented"
+      u.chatid << "not implemented"
 
   else:
-    u.tgid << youAreNotAdminMyDearD
+    u.chatid << youAreNotAdminMyDearD
 
 proc onMessage(bot: Telebot, m: Message): Future[bool] {.async, gcsafe.} =
   let
@@ -65,14 +65,14 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.async, gcsafe.} =
   of usProblem:
     case t
     of wannaAnswerD:
-      u.tgid << doubtSolvedProblemD
+      u.chatid << doubtSolvedProblemD
       update u, usAnswer
 
     of sendMyInputsD:
-      u.tgid << reprInputs getUserPuzzle u
+      u.chatid << reprInputs getUserPuzzle u
 
     else:
-      u.tgid << invalidInputD
+      u.chatid << invalidInputD
 
   of usAnswer:
     if isValidPoet t:
@@ -84,19 +84,19 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.async, gcsafe.} =
 
       update u:
         if isCorrect:
-          u.tgid << congratsD
-          u.tgid << youWonAlreadyD
+          u.chatid << congratsD
+          u.chatid << youWonAlreadyD
           usWon
         else:
-          u.tgid << sorryTryAgainD
+          u.chatid << sorryTryAgainD
           usProblem
 
     else:
       update u, usProblem
-      u.tgid << poetFormatAlertD
+      u.chatid << poetFormatAlertD
 
   of usWon:
-    u.tgid << youWonAlreadyD
+    u.chatid << youWonAlreadyD
 
 proc onUpdate(bot: Telebot, up: Update): Future[bool] {.async, gcsafe.} =
   if issome up.message:
@@ -107,15 +107,15 @@ proc onUpdate(bot: Telebot, up: Update): Future[bool] {.async, gcsafe.} =
 # --- go
 
 when isMainModule:
-  let bot = newTeleBot getEnv "TG_BOT_API_KEY"
-  asyncCheck bot.setMyCommands @[
-    BotCommand(
-      command: $acCommandslist,
-      description: "لیست دستورات ادمین")]
+  let 
+    bot = newTeleBot getEnv "TG_BOT_API_KEY"
+    authorId = parseInt getEnv "AUTHOR_CHAT_ID"
 
   bot.onCommand("start", startCommandHandler)
   for c in AdminCommand:
     bot.onCommand($c, adminCommandHandler)
+
+  authorId << "start ..."
 
   bot.onUpdate onUpdate
   bot.poll 300

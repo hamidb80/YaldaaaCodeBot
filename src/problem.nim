@@ -81,33 +81,16 @@ proc generateProblem*(input: string, logsRange: Slice[int]):
   let tmp = generate(input.toRunes, logsRange)
   ($tmp.shuffled, tmp.logs)
 
-# --- test
+# --- example
 
-suite "tests":
-  test "solve 1":
-    check solve("ammhin".toRunes, @[@[3, 0, 2, 1, 5, 4]]) == "mhmani".toRunes
+func wrap(s: string): string =
+  '"' & s & '"'
 
-  test "solve 2":
-    check solve("aimhnm".toRunes, @[
-      @[3, 0, 2, 1, 5, 4],
-      @[0, 4, 2, 3, 5, 1]
-    ]) == "mhmani".toRunes
-
-  test "generate & solve n":
-    let
-      Logs = generateLogs("hello".len, 10)
-      final = build("hello".toRunes, Logs)
-
-    check solve(final, Logs) == "hello".toRunes
-
-when isMainModule:
+proc example =
   let
     word = toRunes "شب یلدا"
     history = generateLogs(word.len, 5)
     final = build(word, history)
-
-
-  func wrap(s: string): string = '"' & s & '"'
 
   echo wrap $word
   echo wrap $final
@@ -116,3 +99,24 @@ when isMainModule:
 
   for i, h in history.rpairs:
     echo reprLog h, " -> ", wrap $solve(final, history[i..^1])
+
+when isMainModule:
+  suite "tests":
+    test "solve 1":
+      check solve("ammhin".toRunes, @[@[3, 0, 2, 1, 5, 4]]) == "mhmani".toRunes
+
+    test "solve 2":
+      check solve("aimhnm".toRunes, @[
+        @[3, 0, 2, 1, 5, 4],
+        @[0, 4, 2, 3, 5, 1]
+      ]) == "mhmani".toRunes
+
+    test "generate & solve n":
+      let
+        Logs = generateLogs("hello".len, 10)
+        final = build("hello".toRunes, Logs)
+
+      check solve(final, Logs) == "hello".toRunes
+
+  example()
+

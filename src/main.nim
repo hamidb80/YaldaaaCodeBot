@@ -11,8 +11,8 @@ proc begin(bot: TeleBot, c: Chat): Future[void] {.async, gcsafe.} =
   of usInitial:
     u.chatid << greetingD ++ problemK
 
-    var p = getNewPuzzle()
-    p.assigned_to = some u
+    var p = getFreePuzzle()
+    p.belongs = some u
     update u, usProblem
     update p
 

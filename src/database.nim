@@ -18,7 +18,7 @@ type
     usWon
 
   User* = ref object of Model
-    chatid* {.unique.}: int64
+    chatid*{.unique.}: int64
     username*: string
     firstname*: string
     lastname*: string
@@ -29,7 +29,7 @@ type
     initial*: string
     logs*: string
     shuffled*: string
-    assigned_to*: Option[User]
+    belongs*: Option[User]
 
   Attempt* = ref object of Model
     user*: User
@@ -44,7 +44,7 @@ func to*(dbVal: DbValue, T: typedesc[enum]): T = dbVal.i.T
 
 # --- utils
 
-proc genPuzzle*(poet: string): Puzzle = 
+proc genPuzzle*(poet: string): Puzzle =
   let (final, logs) = generateProblem(poet, 80 .. 100)
   Puzzle(initial: poet, logs: reprLogs logs, shuffled: final)
 
@@ -53,14 +53,16 @@ proc genPuzzle*(poet: string): Puzzle =
 template `||`(code): untyped =
   withDb code
 
-proc update*(u: sink User, newState: UserState) =
-  u.state = newState
-  || db.update u
+proc update*(u: User, newState: UserState) =
+  var tmp = u
+  tmp.state = newState
+  || db.update tmp
 
-proc update*[M: Model](ins: sink M) =
-  || db.update ins
+proc update*[M: Model](ins: M) =
+  var tmp = ins
+  || db.update tmp
 
-proc remove*[M: Model](instance: sink M) =
+proc remove*[M: Model](instance: M) =
   var tmp = instance
   || db.delete tmp
 
@@ -95,11 +97,13 @@ proc addPuzzle*(poet: string): Puzzle =
   result = genPuzzle poet
   || db.insert result
 
-proc getNewPuzzle*: Puzzle =
-  || db.select(result, "assigned_to == NULL")
+proc getFreePuzzle*: Puzzle =
+  new result
+  || db.select(result, "belongs IS NULL")
 
 proc getUserPuzzle*(u: User): Puzzle =
-  || db.select(result, "assigned_to == ?", u)
+  result = Puzzle(belongs: some User())
+  || db.select(result, "belongs == ?", u)
 
 proc addAttempt*(u: User, c: bool): Attempt =
   result = Attempt(user: u, succeed: c, timestamp: now())
@@ -109,7 +113,7 @@ proc getStats*: Stats =
   withDb:
     result.users = db.count(User)
     result.answered = db.count(User, "*", false, "state == ?", usWon.int)
-    result.free = db.count(Puzzle, "*", false, "assigned_to == NULL")
+    result.free = db.count(Puzzle, "*", false, "belongs IS NULL")
     result.total = db.count(Puzzle)
 
 proc resetUser*(u: sink User) =
@@ -120,7 +124,7 @@ proc resetUser*(u: sink User) =
 
       try:
         var p = getUserPuzzle(u)
-        reset p.assigned_to
+        reset p.belongs
         db.update p
 
       except NotFoundError: discard
@@ -129,6 +133,5 @@ proc resetUser*(u: sink User) =
 # --- general
 
 proc createDB* =
-  || db.createTables User()
-  || db.createTables Puzzle()
   || db.createTables Attempt(user: User())
+  || db.createTables Puzzle()

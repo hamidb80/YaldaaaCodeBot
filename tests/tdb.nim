@@ -1,5 +1,6 @@
-import std/[unittest, os, times]
-import database
+import std/[unittest, os, times, options]
+import norm/[model, sqlite]
+import database {.all.}
 
 # --- utils
 
@@ -7,6 +8,9 @@ func `{}`(us: seq[User], id: int): User =
   for u in us:
     if u.chatid == id:
       return u
+
+template `?`(s): untyped = some s
+template `!`(t): untyped = none t
 
 # --- generators
 
@@ -18,9 +22,10 @@ func u(c: int64, u, f, l: string, s: UserState): User =
     lastname: l,
     state: s)
 
-proc p(id: int, poet: string): Puzzle =
+proc p(id: int, poet: string, u: Option[User]): Puzzle =
   result = genPuzzle poet
   result.id = id
+  result.belongs = u
 
 func a(u: User, t: DateTime, s: bool): Attempt =
   Attempt(user: u, timestamp: t, succeed: s)
@@ -37,46 +42,105 @@ var
   ]
 
   puzzles = @[
-    p(1, "Hello"),
-    p(2, "I Love"),
-    p(3, "You tube"),
-    p(5, "what"),
-    p(6, "are you"),
-    p(7, "doing today"),
+    p(1, "Hello", ?users{11}),
+    p(2, "I Love You", ?users{12}),
+    p(3, "the way", ?users{13}),
+    p(4, "you are", !User),
   ]
 
   attempts = @[
     a(users{11}, now(), false),
     a(users{11}, now(), false),
-    a(users{11}, now(), false),
 
     a(users{12}, now(), false),
+    a(users{12}, now(), false),
+    a(users{12}, now(), false),
+    a(users{12}, now(), true),
 
-    a(users{13}, now(), false),
-    a(users{13}, now(), false),
-    a(users{13}, now(), false),
-    a(users{13}, now(), false),
-
-    a(users{14}, now(), false),
-
-    a(users{15}, now(), false),
-    a(users{15}, now(), false),
+    a(users{13}, now(), true),
   ]
 
 # --- tests
+import logging
+var consoleLog = newConsoleLogger()
+addHandler(consoleLog)
 
 suite "DataBase":
-  putEnv("DB_HOST", ":memory:")
+  const path = "./test.db"
+  
+  if fileExists path: 
+    removeFile path
+  
+  putEnv("DB_HOST", path)
   createDB()
 
-  # test ""
+  template ins(what): untyped =
+    for i in what.mitems:
+      || db.insert(i, force = true)
 
-  # withDb:
-  #   for (uname, chatid) in [("ali", 12), ("hamid", 13), ("majid", 14)]:
-  #     var u = User(state: initial, username: uname, chatid: chatid)
-  #     db.insert(u)
+  test "insert":
+    ins users
+    ins puzzles
+    ins attempts
 
-  # echo getUser(13)[]
-  # for u in users:
-  #   echo u[]
+  test "change user state":
+    update users{11}, usWon
+    check getUser(11).state == usWon
+
+  test "add user":
+    discard addUser(16, "sinaMaleki11", "sina", "maleki")
+    check getUser(16).firstName == "sina"
+
+  test "add or get user":
+    let u = addOrGetUser(11, "aliii", "jamshid", "reza")
+    check:
+      u.username != "aliii"
+      getUser(11).username == "hamidb80"
+
+  test "get free puzzle":
+    var p = getFreePuzzle()
+    p.belongs = some users{15}
+    update p
+    check p.id == 4
+
+    expect NotFoundError:
+      discard getFreePuzzle()
+
+  test "get user's puzzle":
+    let p = getUserPuzzle(users{12})
+
+    check:
+      p.belongs.get.chatid == 12
+      p.id == 2
+
+  test "add puzzle":
+    discard addPuzzle "whaaat"
+    let p = getFreePuzzle()
+    check:
+      p.initial == "whaaat"
+      p.shuffled notin ["whaaat", ""]
+      p.logs.len > 1000
+
+  test "stats":
+    let st = getStats()
+    check:
+      st.users == 6
+      st.answered == 2
+      st.free == 1
+      st.total == 5
+
+  test "add attempt":
+    discard addAttempt(users{11}, true)
+    var at = Attempt(user: User())
+    || db.select(at, "user = ? AND succeed", users{11})
+    check:
+      at.succeed
+      at.user.chatid == 11
+
+  test "reset user":
+    resetUser getUser(11)
+
+    check getUser(11).state == usInitial
+    expect NotFoundError:
+      discard getUserPuzzle(users{11})
 

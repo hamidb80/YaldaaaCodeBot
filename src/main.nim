@@ -1,13 +1,16 @@
 import std/[asyncDispatch, strutils, os, options]
 import telebot
-import dialogs, aliases, database
+import dialogs, aliases, database, tg
 
 
 # --- type defs
 
 type
   AdminCommand = enum
-    stats, addpoet, reset, backup
+    acStats = "stats"
+    acAddpoet = "addpoet"
+    acReset = "reset"
+    acBackup = "backup"
 
 # --- events
 
@@ -15,16 +18,15 @@ proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.async.} =
   result = true
   c.message.chat.id << greetingD
 
-  
 
 proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async.} =
   result = true
 
   case c.command
-  of $stats: discard
-  of $addpoet: discard
-  of $reset: discard
-  of $backup: discard
+  of $acStats: discard
+  of $acAddpoet: discard
+  of $acReset: discard
+  of $acBackup: discard
 
 proc onMessage(bot: Telebot, m: Message): Future[bool] {.async.} =
   discard

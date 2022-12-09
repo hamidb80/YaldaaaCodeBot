@@ -15,29 +15,32 @@ proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.async.} =
   result = true
   c.message.chat.id << greetingD
 
-proc onMsg(bot: Telebot, up: Update): Future[bool] {.async.} =
-  if issome up.message:
-    discard
-
+proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async.} =
   result = true
 
-proc adminCommandHandler(bot: Telebot, cmd: Command): Future[bool] {.async.} =
-  result = true
-
-  case cmd.command
+  case c.command
   of $stats: discard
   of $addpoet: discard
   of $reset: discard
   of $backup: discard
 
+proc onMessage(bot: Telebot, m: Message): Future[bool] {.async.} =
+  discard
+
+proc onUpdate(bot: Telebot, up: Update): Future[bool] {.async.} =
+  if issome up.message:
+    return await onMessage(bot, up.message.get)
+  else:
+    return true
+
 # --- go
 
 when isMainModule:
-  let bot = newTeleBot(getEnv("TG_BOT_API_KEY"))
+  let bot = newTeleBot getEnv "TG_BOT_API_KEY"
 
   bot.onCommand("start", startCommandHandler)
   for c in AdminCommand:
     bot.onCommand($c, adminCommandHandler)
 
-  bot.onUpdate(onMsg)
-  bot.poll(timeout = 300)
+  bot.onUpdate onUpdate
+  bot.poll 300

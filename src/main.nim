@@ -1,5 +1,5 @@
 import std/[asyncDispatch, strutils, os, options]
-import telebot, norm/[sqlite, model]
+import telebot
 import dialogs, aliases, database
 
 
@@ -28,6 +28,7 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async.} =
 
 proc onMessage(bot: Telebot, m: Message): Future[bool] {.async.} =
   discard
+  # sendMessage( replyMarkup = )
 
 proc onUpdate(bot: Telebot, up: Update): Future[bool] {.async.} =
   if issome up.message:

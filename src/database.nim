@@ -44,6 +44,10 @@ template `||`(code): untyped =
 proc update*[M: Model](u: M) =
   || db.update u
 
+proc remove*[M: Model](instance: sink M) =
+  var tmp = instance
+  || db.delete tmp
+
 # --- actions
 
 proc addUser*(tgid: int): User =
@@ -54,20 +58,20 @@ proc getUser*(tgid: int): User =
   result = User()
   || db.select(result, "tgid == ?", tgid)
 
+proc addOrGetUser*(tgid: int, username, firstname, lastname: string): User =
+  # TODO
+  discard
+
 proc addPuzzle*(poet: string): Puzzle =
   let (final, logs) = generateProblem(poet, 300 .. 500)
   result = Puzzle(initial: poet, logs: reprLogs logs, shuffled: final)
   || db.insert result
 
-proc remove*(u: sink User) =
-  var tmp = u
-  || db.delete tmp
-
 proc getNewPuzzle*: Puzzle =
   || db.select(result, "assigned_to == NULL")
 
-proc getUsersPuzzle*(tgid: int): Puzzle =
-  || db.select(result, "assigned_to == ?", tgid)
+proc getUserPuzzle*(u: User): Puzzle =
+  || db.select(result, "assigned_to == ?", u)
 
 proc setAttempt*(u: User, c: bool): Attempt =
   result = Attempt(user: u, is_correct: c, timestamp: now())
@@ -82,6 +86,8 @@ proc getPuzzlesStats*: tuple[answered, free, total: int64] =
 # -- test
 
 when isMainModule:
+  # TODO put your test data in .csv files and then test actions
+  
   putEnv("DB_HOST", "./test.db")
 
   || db.createTables User()

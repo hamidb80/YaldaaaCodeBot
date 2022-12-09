@@ -1,18 +1,23 @@
 import std/[times, strutils, options]
 import norm/[model, sqlite, pragmas]
-import problem
+import problem, tg
+
+
+type
+  Stats* = tuple
+    users, answered, free, total: int64
 
 # --- models
 
 type
-  UserState = enum
+  UserState* = enum
     usInitial
     usProblem
     usAnswer
     usWon
 
   User* = ref object of Model
-    tgid* {.unique.}: int
+    tgid* {.unique.}: int64
     username*: string
     firstname*: string
     lastname*: string
@@ -41,7 +46,7 @@ func to*(dbVal: DbValue, T: typedesc[enum]): T = dbVal.i.T
 template `||`(code): untyped =
   withDb code
 
-proc update*[M: Model](u: M) =
+proc update*[M: Model](u: sink M) =
   || db.update u
 
 proc remove*[M: Model](instance: sink M) =
@@ -50,11 +55,11 @@ proc remove*[M: Model](instance: sink M) =
 
 # --- actions
 
-proc getUser*(tgid: int): User =
+proc getUser*(tgid: int64): User =
   result = User()
   || db.select(result, "tgid == ?", tgid)
 
-proc addUser*(tid: int, u, f, l: string): User =
+proc addUser*(tid: int64, u, f, l: string): User =
   result = User(
     tgid: tid,
     username: u,
@@ -65,11 +70,15 @@ proc addUser*(tid: int, u, f, l: string): User =
 
   || db.insert result
 
-proc addOrGetUser*(tgid: int, u, f, l: string): User =
+proc addOrGetUser*(tgid: int64, u, f, l: string): User =
   try:
     getUser(tgid)
   except NotFoundError:
     addUser(tgid, u, f, l)
+
+proc addOrGetUser*(tu: TgUserInfo): User =
+  addOrGetUser(tu.chatid,
+    tu.username, tu.firstname, tu.lastname)
 
 proc addPuzzle*(poet: string): Puzzle =
   let (final, logs) = generateProblem(poet, 300 .. 500)
@@ -86,10 +95,11 @@ proc setAttempt*(u: User, c: bool): Attempt =
   result = Attempt(user: u, succeed: c, timestamp: now())
   || db.insert result
 
-proc getPuzzlesStats*: tuple[answered, free, total: int64] =
+proc getStats*: Stats =
   withDb:
-    result.answered = db.count(User, "1", false, "state == ?", usWon.int)
-    result.free = db.count(Puzzle, "1", false, "assigned_to == NULL")
+    result.users = db.count(User)
+    result.answered = db.count(User, "*", false, "state == ?", usWon.int)
+    result.free = db.count(Puzzle, "*", false, "assigned_to == NULL")
     result.total = db.count(Puzzle)
 
 proc resetUser*(u: sink User) =
@@ -108,7 +118,7 @@ proc resetUser*(u: sink User) =
 
 # --- general
 
-proc createDB* = 
+proc createDB* =
   || db.createTables User()
   || db.createTables Puzzle()
   || db.createTables Attempt(user: User())

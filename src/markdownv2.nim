@@ -1,5 +1,7 @@
 import std/strformat
 
+type StyledString* = distinct string
+
 func escapeMarkdownV2*(s: string): string =
     result = newStringOfCap(s.len * 2)
     for c in s:
@@ -8,12 +10,13 @@ func escapeMarkdownV2*(s: string): string =
 
         result.add c
 
-func bold*(s: string): string = fmt"*{s}*"
-func italic*(s: string): string = fmt"_{s}_"
-func underline*(s: string): string = fmt"__{s}__"
-func link*(url, label: string): string = fmt"[{url}]({label})"
-func spoiler*(s: string): string = fmt"||{s}||"
-func inlineCode*(s: string): string = fmt"`{s}`"
-func code*(s: string): string = fmt"```{s}```"
+template ss*(s: string): untyped = StyledString s
 
-func wrapString*(s: string): string = fmt "\"{s}\""
+func bold*(s: string): StyledString = ss fmt"*{s}*"
+func italic*(s: string): StyledString = ss fmt"_{s}_"
+func underline*(s: string): StyledString = ss fmt"__{s}__"
+func link*(url, label: string): StyledString = ss fmt"[{url}]({label})"
+func spoiler*(s: string): StyledString = ss fmt"||{s}||"
+func inlineCode*(s: string): StyledString = ss fmt"`{s}`"
+func code*(s: string): StyledString = ss fmt"```{s}```"
+func wrapString*(s: string): StyledString = ss fmt "\"{s}\""

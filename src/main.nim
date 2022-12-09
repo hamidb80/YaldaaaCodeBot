@@ -15,6 +15,8 @@ proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.async.} =
   result = true
   c.message.chat.id << greetingD
 
+  
+
 proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async.} =
   result = true
 

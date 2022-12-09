@@ -1,4 +1,11 @@
 when false:
+  @admin:
+    /stats (answered, free, all)
+    /addpuzzle poet
+    /remove user
+    /backup
+
+
   @user:
     /start
     -> greeting

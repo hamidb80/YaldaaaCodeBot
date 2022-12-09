@@ -1,0 +1,14 @@
+kind: ExternalService
+name: yaldaaa-code-bot
+spec:
+  image: yldcdbt:0.0.1
+  
+  resources:
+    memory: 200Mi
+
+  env:
+  - name: TG_BOT_API_KEY
+    secret: TG_BOT_API_TOKEN
+
+  - name: STORAGE
+    value: "/mnt/shared-volume/"

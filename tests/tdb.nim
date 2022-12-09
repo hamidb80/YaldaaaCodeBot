@@ -1,30 +1,28 @@
 import std/[unittest, os]
-import database, problem
+import database
 
 # --- sample data
 
-let 
-  users = [
+# let
+#   users = [
 
-  ] 
+#   ]
 
-  puzzles = [
+#   puzzles = [
 
-  ]
+#   ]
 
-  attempts = [
+#   attempts = [
 
-  ]
+#   ]
 
 
 
-# --- 
+# --- tests
 
 suite "DataBase":
-
-  putEnv("DB_HOST", "./test.db")
+  putEnv("DB_HOST", ":memory:")
   createDB()
-
 
   # test ""
 
@@ -33,7 +31,7 @@ suite "DataBase":
   #     var u = User(state: initial, username: uname, tgid: tgid)
   #     db.insert(u)
 
-  echo getUser(13)[]
+  # echo getUser(13)[]
   # for u in users:
   #   echo u[]
 

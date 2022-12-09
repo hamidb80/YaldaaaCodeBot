@@ -43,6 +43,7 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe
         u.tgid << poetFormatAlertD
 
     of $acReset:
+      # TODO error handling for parsing invlid int
       resetUser getUser(parseInt c.params)
       u.tgid << resetedD
 

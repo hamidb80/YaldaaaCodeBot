@@ -1,18 +1,10 @@
-import telebot
-
 when false:
-  @admin:
-    /stats -> (answered, used/all)
-    /addpoet [poet]
-    /reset [tgid]
-    /backup
-
   @user:
     /start
     -> greeting
 
     block loop:
-      case [senMyInputs, wannaAnswer]
+      case [senMyInputsD, wannaAnswerD]
       of 1:
         -> user.puzzle.shuffled
         -> user.puzzle.logs
@@ -21,9 +13,9 @@ when false:
         -> doubtSolvedProblemD
         -> sendToProveD
 
-        if msg.removeSpaces == user.puzzle.initial.removeSpaces:
+        if msg.removeSpaces == puzzle.initial.removeSpaces:
           -> congratsD
-          -> weWillInformYou
+          -> weWillInformYouD
 
           break loop
 

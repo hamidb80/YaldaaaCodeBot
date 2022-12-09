@@ -37,9 +37,6 @@ func `++`*[S: string or StyledString] (
   TextWithButtons[S](text: t, keyboard: k)
 
 
-template `<<.`*(chatid: int64, text: string): untyped {.dirty.} =
-  discard await bot.sendMessage(chatid, text)
-
 template `<<`*(chatid: int64, text: string): untyped {.dirty.} =
   asyncCheck bot.sendMessage(chatid, text)
 

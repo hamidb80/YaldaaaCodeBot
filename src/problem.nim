@@ -112,11 +112,12 @@ when isMainModule:
       ]) == "mhmani".toRunes
 
     test "generate & solve n":
-      let
-        Logs = generateLogs("hello".len, 10)
-        final = build("hello".toRunes, Logs)
+      for _ in 1..10:
+        let
+          Logs = generateLogs("hello".len, 10)
+          final = build("hello".toRunes, Logs)
 
-      check solve(final, Logs) == "hello".toRunes
+        check solve(final, Logs) == "hello".toRunes
 
   example()
 

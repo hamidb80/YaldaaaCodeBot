@@ -2,67 +2,78 @@ import std/[strutils, strformat]
 import database, markdownv2, tg
 
 const
-  greetingD* = ss """
+  greetingD* = ss dedent """
     سلام به مسابقه *یلدا کد* انجمن علمی مهندسی کامپیوتر دانشگاه شاهد خوش اومدی!
+    😍
+
+    برای مسابقه آماده ای؟
+    👩‍💻
   """
 
-  youAreNotAdminMyDearD* = """
+  youAreNotAdminMyDearD* = dedent """
     عزیزم شما ادمین نیستی
+    😠
   """
 
-  sendMyInputsD* = """
+  sendMyInputsD* = dedent """
     ورودی هامو بفرست
   """
 
-  wannaAnswerD* = """
+  wannaAnswerD* = dedent """
     میخوام جواب رو بدم
   """
 
-  doubtSolvedProblemD* = """ 
+  doubtSolvedProblemD* = dedent """ 
     واقعا فکر میکنی جواب درست رو پیدا کردی؟ 
-  """
-  sendToProveD* = """ 
     خب اگر راست میگی جوابو بفرست ببینم ...
+    🤔
   """
 
-  congratsD* = """
+  congratsD* = dedent """ 
     ایول بابا! خود خودشه!
+    🎉
   """
 
-  weWillInformYouD* = """
-    حتما نتیجه قرعه کشی رو اعلام میکنیم
+  sorryTryAgainD* = dedent """ 
+    نه درست نیست. دوباره تلاش کن
+    🙃
   """
 
-  youWonAlreadyD* = """
+  youWonAlreadyD* = dedent """
     مسابقه همین یدونه سوال بود که جواب دادی! یلدا خوش بگذره!
+    😘
   """
 
-  poetFormatAlertD* = """
-    الگوی شعر اشتباه است. توجه کنید که باید بین دو مصرع ` *** ` بیاید.
+  poetFormatAlertD* = dedent """
+    گوی شعر اشتباه است. توجه کنید که باید بین دو مصرع ` *** ` بیاید.
+    😓
   """
 
-  savedD* = """
+  savedD* = dedent """
     ثبت شد
+    ✅
   """
 
-  youAttendedBeforeD* = """
+  youAttendedBeforeD* = dedent """
     شما قبلا در مسابقه شرکت کرده اید
+    🤨
   """
 
-  resetedD* = """
+  resetedD* = dedent """
     ریست شد
+    ☠
   """
 
-  invalidInputD* = """
+  invalidInputD* = dedent """
     ورودی نامعتبر
+    😦
   """
 
-
-
-  adminCommandsD* = fmt"""
+  adminCommandsD* = dedent fmt"""
+    :دستورات
     /{$acStats}: آمار
     /{$acAddpoet}: اضافه کردن شعر
-    /{$acReset}: ریست کردن با کاربر با ورودی chatid
+    /{$acReset}: ریست کردن با کاربر ورودی با چت آیدی
     /{$acBackup}: بکاپ گرفتن از دیتابیس
 
     مثال استفاده:
@@ -72,8 +83,15 @@ const
     /{$acBackup} 
   """
 
+  emailContentD = dedent """
+    متن ایمیل
+  """
+
+  logFileD = "log file"
+
 let
   problemK* = toReplyKeyboard @[sendMyInputsD, wannaAnswerD]
+
 
 func reprStats*(st: Stats): string =
   fmt"""
@@ -83,5 +101,16 @@ func reprStats*(st: Stats): string =
     همه شعر ها: {st.total}
   """
 
+func reprInputs*(p: Puzzle): StyledString =
+  ss fmt """{bold emailContentD}: "{p.shuffled}"\n\n{bold logFileD}:\n{codeBlock p.logs}"""
+
 func isValidPoet*(sentence: string): bool =
-  " *** " in sentence
+  "***" in sentence
+
+func cleanFrom(s: string, excluded: set[char]): string =
+  for ch in s:
+    if ch notin excluded:
+      result.add ch
+
+func cleanPoet*(s: string): string =
+  cleanFrom s, {' ', '*'}

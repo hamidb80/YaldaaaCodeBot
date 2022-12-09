@@ -46,8 +46,12 @@ func to*(dbVal: DbValue, T: typedesc[enum]): T = dbVal.i.T
 template `||`(code): untyped =
   withDb code
 
-proc update*[M: Model](u: sink M) =
+proc update*(u: sink User, newState: UserState) =
+  u.state = newState
   || db.update u
+
+proc update*[M: Model](ins: sink M) =
+  || db.update ins
 
 proc remove*[M: Model](instance: sink M) =
   var tmp = instance
@@ -81,7 +85,7 @@ proc addOrGetUser*(tu: TgUserInfo): User =
     tu.username, tu.firstname, tu.lastname)
 
 proc addPuzzle*(poet: string): Puzzle =
-  let (final, logs) = generateProblem(poet, 300 .. 500)
+  let (final, logs) = generateProblem(poet, 80 .. 100)
   result = Puzzle(initial: poet, logs: reprLogs logs, shuffled: final)
   || db.insert result
 
@@ -91,7 +95,7 @@ proc getNewPuzzle*: Puzzle =
 proc getUserPuzzle*(u: User): Puzzle =
   || db.select(result, "assigned_to == ?", u)
 
-proc setAttempt*(u: User, c: bool): Attempt =
+proc addAttempt*(u: User, c: bool): Attempt =
   result = Attempt(user: u, succeed: c, timestamp: now())
   || db.insert result
 

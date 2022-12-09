@@ -1,4 +1,4 @@
-import std/[asyncDispatch, strutils, os, options, strformat]
+import std/[asyncDispatch, strutils, os, options]
 import telebot
 import dialogs, database, tg
 
@@ -10,11 +10,14 @@ proc begin(bot: TeleBot, c: Chat): Future[void] {.async, gcsafe.} =
   case u.state
   of usInitial:
     u.tgid << greetingD ++ problemK
+
+    var p = getNewPuzzle()
+    p.assigned_to = some u
+    update u, usProblem
+    update p
+
   else:
     u.tgid << youAttendedBeforeD
-
-  u.state = usProblem
-  update u
 
 proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe.} =
   result = true
@@ -61,23 +64,38 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.async, gcsafe.} =
   of usProblem:
     case t
     of wannaAnswerD:
-      discard
+      u.tgid << doubtSolvedProblemD
+      update u, usAnswer
 
     of sendMyInputsD:
-      discard
+      u.tgid << reprInputs getUserPuzzle u
 
     else:
       u.tgid << invalidInputD
 
   of usAnswer:
     if isValidPoet t:
-      discard
+      let
+        p = getUserPuzzle(u)
+        isCorrect = p.initial.cleanPoet == t.cleanPoet
+
+      discard addAttempt(u, isCorrect)
+
+      update u:
+        if isCorrect:
+          u.tgid << congratsD
+          u.tgid << youWonAlreadyD
+          usWon
+        else:
+          u.tgid << sorryTryAgainD
+          usProblem
+
     else:
+      update u, usProblem
       u.tgid << poetFormatAlertD
 
   of usWon:
     u.tgid << youWonAlreadyD
-
 
 proc onUpdate(bot: Telebot, up: Update): Future[bool] {.async, gcsafe.} =
   if issome up.message:

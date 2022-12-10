@@ -1,4 +1,5 @@
 .fandogh
+fandogh.yml
 
 *.db
 *.exe

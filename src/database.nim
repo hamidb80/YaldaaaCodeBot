@@ -76,13 +76,13 @@ proc getAdmins*: seq[User] =
   result = @[User()]
   || db.select(result, "isAdmin")
 
-proc addUser*(tid: int64, u, f, l: string): User =
+proc addUser*(tid: int64, u, f, l: string, a = false): User =
   result = User(
     chatid: tid,
     username: u,
     firstname: f,
     lastname: l,
-    isAdmin: false,
+    isAdmin: a,
     state: usInitial)
 
   || db.insert result

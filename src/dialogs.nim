@@ -26,12 +26,17 @@ const
     ظرفیت تموم شده - لطفا شعر اضافه کن
   """
 
-  sendMyInputsD* = dedent """
+  sendMyInputsD* = strip """
     ورودی هامو بفرست
   """
 
-  wannaAnswerD* = dedent """
+  wannaAnswerD* = strip """
     میخوام جواب رو بدم
+  """
+
+  problemAccuredD* = dedent """
+    مشکلی پیش آمد
+    🚧
   """
 
   doubtSolvedProblemD* = dedent """ 

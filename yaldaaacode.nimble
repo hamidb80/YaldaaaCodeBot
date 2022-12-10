@@ -24,5 +24,6 @@ task gen, "generate final executeable file":
 
 # --- reminder
 
+# fandogh image init --name ylcdbt
 # fandogh image publish --version ...
 # fandogh service apply -f fandogh.yml

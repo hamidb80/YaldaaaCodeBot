@@ -157,6 +157,6 @@ when isMainModule:
 
   # --- run bot
 
-  # authorId << "Hey ..."
+  discard waitfor bot.sendMessage(authorId, "started ⚒")
   bot.onUpdate onUpdate
   bot.poll 300

@@ -1,7 +1,7 @@
 kind: ExternalService
 name: yaldaaa-code-bot
 spec:
-  image: yldcdbt:0.0.21
+  image: ylcdbt:0.0.4
   
   resources:
     memory: 200Mi

@@ -1,5 +1,6 @@
-import std/[strutils, strformat]
+import std/[strutils, sequtils, strformat]
 import database, markdownv2, tg
+
 
 const
   greetingD* = ss dedent """
@@ -16,7 +17,7 @@ const
   """
 
   wereOutOfPuzzles* = dedent """
-    متاسفانه ظرفیت پر شده - من به ادمین خبر میدم...
+    متاسفانه ظرفیت پر شده ، من به ادمین خبر میدم...
     
     لطفا نیم ساعت دیگه دوباره امتحان کن
     🕒
@@ -61,7 +62,7 @@ const
   """
 
   poetFormatAlertD* = dedent """
-    گوی شعر اشتباه است. توجه کنید که باید بین دو مصرع ` *** ` بیاید.
+    نوشتار شعر اشتباه است. توجه کنید که باید بین دو مصرع ` *** ` بیاید.
     😓
   """
 
@@ -99,26 +100,24 @@ const
     /{$acPromote} 101862091
   """
 
-  emailContentD = dedent """
+  emailContentD = strip """
     متن ایمیل
   """
-
-  logFileD = "log file"
 
 let
   problemK* = toReplyKeyboard @[sendMyInputsD, wannaAnswerD]
 
 
 func reprStats*(st: Stats): string =
-  fmt"""
+  dedent fmt"""
     شرکت کننده ها: {st.users}
     حل کرده: {st.answered}
     شعر های آزاد: {st.free}
     همه شعر ها: {st.total}
   """
 
-func reprInputs*(p: Puzzle): StyledString =
-  ss fmt """{bold emailContentD}: "{p.shuffled}"\n\n{bold logFileD}:\n{codeBlock p.logs}"""
+func puzzleEmail*(p: Puzzle): StyledString =
+  ss dedent fmt "{bold emailContentD}:\n\"{escapeMarkdownV2 p.shuffled}\""
 
 func isValidPoet*(sentence: string): bool =
   "***" in sentence

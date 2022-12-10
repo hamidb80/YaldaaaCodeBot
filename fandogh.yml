@@ -1,17 +1,17 @@
 kind: ExternalService
 name: yaldaaa-code-bot
 spec:
-  image: yldcdbt:0.0.1
+  image: yldcdbt:0.0.21
   
   resources:
     memory: 200Mi
 
   env:
   - name: TG_BOT_API_KEY
-    secret: TG_BOT_API_TOKEN
+    secret: tg-bot-api-token
 
-    - name: AUTHOR_CHAT_ID
+  - name: AUTHOR_CHAT_ID
     value: 101862091
     
-    - name: DB_HOST
+  - name: DB_HOST
     value: "/mnt/shared-volume/yalda_code_bot.db"

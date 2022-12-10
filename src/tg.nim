@@ -1,4 +1,4 @@
-import std/options
+import std/[options]
 import telebot, telebot/private/types
 import markdownv2
 
@@ -37,13 +37,14 @@ func `++`*[S: string or StyledString] (
   TextWithButtons[S](text: t, keyboard: k)
 
 
+# XXX nim has some problems with asyncCheck in except branch, so I use discard await instead
 template `<<`*(chatid: int64, text: string): untyped {.dirty.} =
-  asyncCheck bot.sendMessage(chatid, text)
+  discard await bot.sendMessage(chatid, text)
 
 template `<<`*(chatid: int64, text: StyledString): untyped {.dirty.} =
-  asyncCheck bot.sendMessage(chatid, text.string, parsemode = "MarkdownV2")
+  discard await bot.sendMessage(chatid, text.string, parsemode = "MarkdownV2")
 
 template `<<`*(chatid: int64, box: TextWithButtons): untyped {.dirty.} =
-  asyncCheck bot.sendMessage(chatid,
+  discard await bot.sendMessage(chatid,
     box.text.string,
     replyMarkup = box.keyboard)

@@ -1,10 +1,10 @@
-import std/[asyncDispatch, strutils, os, options, logging]
+import std/[asyncdispatch, strutils, os, options, logging]
 import telebot, norm/sqlite
-import dialogs, database, tg
+import dialogs, database, tg, utils
 
 # --- events
 
-proc begin(bot: TeleBot, c: Chat): Future[void] {.async, gcsafe.} =
+proc userHey(bot: TeleBot, c: Chat): Future[void] {.gcsafe, async.} =
   let u = addOrGetUser extractUserInfo c
 
   case u.state
@@ -26,11 +26,11 @@ proc begin(bot: TeleBot, c: Chat): Future[void] {.async, gcsafe.} =
   else:
     u.chatid << youAttendedBeforeD ++ problemK
 
-proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe.} =
+proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
   result = true
-  asyncCheck bot.begin(c.message.chat)
+  await bot.userHey(c.message.chat)
 
-proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe.} =
+proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
   result = true
   let u = addOrGetUser extractUserInfo c.message.chat
 
@@ -45,7 +45,8 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe
 
       of $acAddpoet:
         if isValidPoet c.params:
-          discard addPuzzle c.params.strip
+          let p = addPuzzle c.params.strip
+          u.chatid << puzzleEmail p
           u.chatid << savedD
         else:
           u.chatid << poetFormatAlertD
@@ -71,14 +72,15 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe
   else:
     u.chatid << youAreNotAdminMyDearD
 
-proc onMessage(bot: Telebot, m: Message): Future[bool] {.async, gcsafe.} =
+proc onMessage(bot: Telebot, m: Message): Future[bool] {.gcsafe, async.} =
+  result = true
   let
     u = addOrGetUser extractUserInfo m.chat
     t = m.text.get("")
 
   case u.state
   of usInitial:
-    asyncCheck bot.begin(m.chat)
+    asyncCheck bot.userHey(m.chat)
 
   of usProblem:
     case t
@@ -87,7 +89,12 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.async, gcsafe.} =
       update u, usAnswer
 
     of sendMyInputsD:
-      u.chatid << reprInputs getUserPuzzle u
+      let p = getUserPuzzle u
+      u.chatid << puzzleEmail p
+
+      let path = writeTempFile(".log.txt", p.logs)
+      discard await bot.sendDocument(u.chatid, "file://" & path,
+          caption = "log.txt")
 
     else:
       u.chatid << invalidInputD
@@ -115,7 +122,7 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.async, gcsafe.} =
   of usWon:
     u.chatid << youWonAlreadyD
 
-proc onUpdate(bot: Telebot, up: Update): Future[bool] {.async, gcsafe.} =
+proc onUpdate(bot: Telebot, up: Update): Future[bool] {.gcsafe, async.} =
   if issome up.message:
     return await onMessage(bot, up.message.get)
   else:
@@ -150,6 +157,6 @@ when isMainModule:
 
   # --- run bot
 
-  authorId << "Hey ..."
+  # authorId << "Hey ..."
   bot.onUpdate onUpdate
   bot.poll 300

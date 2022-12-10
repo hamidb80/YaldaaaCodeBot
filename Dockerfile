@@ -1,4 +1,4 @@
-FROM nimlang/nim:1.6.6-alpine-onbuild
+FROM nimlang/nim:1.6.10-alpine-onbuild
 
 # install timezones database
 RUN apk add tzdata 
@@ -9,5 +9,5 @@ RUN cp /usr/share/zoneinfo/Iran /etc/localtime
 WORKDIR /app
 COPY . /app/
 
-RUN nimble go
+RUN nimble gen
 CMD ["./bin.exe"]

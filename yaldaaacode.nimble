@@ -19,7 +19,8 @@ task debug, "runs on your computer for testing/debuging":
   exec "nim -d:ssl --mm:orc r ./src/main.nim"
 
 task gen, "generate final executeable file": 
-  exec "nim -d:release -d:ssl --mm:orc --out:bin.exe c ./src/main.nim"
+  # exec "nim -f -d:release -d:ssl --out:bin.exe c ./src/main.nim"
+  exec "nim -f -d:ssl --out:bin.exe c ./src/main.nim"
 
 # --- reminder
 

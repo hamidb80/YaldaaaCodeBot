@@ -13,5 +13,5 @@ spec:
     - name: AUTHOR_CHAT_ID
     value: "101862091"
     
-    - name: STORAGE
-    value: "/mnt/shared-volume/"
+    - name: DB_HOST
+    value: "/mnt/shared-volume/yalda_code_bot.db"

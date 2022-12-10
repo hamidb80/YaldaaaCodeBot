@@ -22,7 +22,7 @@ type
     username*: string
     firstname*: string
     lastname*: string
-    is_admin*: bool
+    isAdmin*: bool
     state*: UserState
 
   Puzzle* = ref object of Model
@@ -72,13 +72,17 @@ proc getUser*(chatid: int64): User =
   result = User()
   || db.select(result, "chatid == ?", chatid)
 
+proc getAdmins*: seq[User] =
+  result = @[User()]
+  || db.select(result, "isAdmin")
+
 proc addUser*(tid: int64, u, f, l: string): User =
   result = User(
     chatid: tid,
     username: u,
     firstname: f,
     lastname: l,
-    is_admin: false,
+    isAdmin: false,
     state: usInitial)
 
   || db.insert result

@@ -1,4 +1,4 @@
-import std/[unittest, os, times, options]
+import std/[unittest, os, times, options, sequtils, algorithm]
 import norm/[model, sqlite]
 import database {.all.}
 
@@ -14,12 +14,13 @@ template `!`(t): untyped = none t
 
 # --- generators
 
-func u(c: int64, u, f, l: string, s: UserState): User =
+func u(c: int64, u, f, l: string, s: UserState, a: bool): User =
   User(
     chatid: c,
     username: u,
     firstname: f,
     lastname: l,
+    isAdmin: a,
     state: s)
 
 proc p(id: int, poet: string, u: Option[User]): Puzzle =
@@ -32,13 +33,17 @@ func a(u: User, t: DateTime, s: bool): Attempt =
 
 # --- sample data
 
+const
+  T = true
+  F = false
+
 var
   users = @[
-    u(11, "hamidb80", "hamid", "bluri", usProblem),
-    u(12, "MHB80", "hassan", "barati", usWon),
-    u(13, "helloworlddev", "behnia", "soleimani", usAnswer),
-    u(14, "Amir_H7", "amirhossein", "nezafati", usProblem),
-    u(15, "amirreza_tav", "amirreza", "tavakolo", usProblem),
+    u(11, "hamidb80", "hamid", "bluri", usProblem, T),
+    u(12, "MHB80", "hassan", "barati", usWon, T),
+    u(13, "helloworlddev", "behnia", "soleimani", usAnswer, F),
+    u(14, "Amir_H7", "amirhossein", "nezafati", usProblem, F),
+    u(15, "amirreza_tav", "amirreza", "tavakolo", usProblem, F),
   ]
 
   puzzles = @[
@@ -67,10 +72,10 @@ addHandler(consoleLog)
 
 suite "DataBase":
   const path = "./test.db"
-  
-  if fileExists path: 
+
+  if fileExists path:
     removeFile path
-  
+
   putEnv("DB_HOST", path)
   createDB()
 
@@ -90,6 +95,9 @@ suite "DataBase":
   test "add user":
     discard addUser(16, "sinaMaleki11", "sina", "maleki")
     check getUser(16).firstName == "sina"
+
+  test "getAdmins":
+    check getAdmins().mapit(it.chatid).sorted == @[11'i64, 12]
 
   test "add or get user":
     let u = addOrGetUser(11, "aliii", "jamshid", "reza")

@@ -1,6 +1,10 @@
-import std/[asyncDispatch, strutils, os, options]
-import telebot
+import std/[asyncDispatch, strutils, os, options, logging]
+import telebot, norm/sqlite
 import dialogs, database, tg
+
+
+var L = newConsoleLogger(fmtStr = "$levelname, [$time] ")
+addHandler(L)
 
 # --- events
 
@@ -11,13 +15,20 @@ proc begin(bot: TeleBot, c: Chat): Future[void] {.async, gcsafe.} =
   of usInitial:
     u.chatid << greetingD ++ problemK
 
-    var p = getFreePuzzle()
-    p.belongs = some u
-    update u, usProblem
-    update p
+    try:
+      var p = getFreePuzzle()
+      p.belongs = some u
+      update u, usProblem
+      update p
+  
+    except NotFoundError:
+      u.chatid << wereOutOfPuzzles
+
+      for a in getAdmins():
+        a.chatid << outputPuzzleAlertD
 
   else:
-    u.chatid << youAttendedBeforeD
+    u.chatid << youAttendedBeforeD ++ problemK
 
 proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe.} =
   result = true
@@ -44,11 +55,16 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.async, gcsafe
 
     of $acReset:
       # TODO error handling for parsing invlid int
-      resetUser getUser(parseInt c.params)
+      let uid = parseInt c.params
+      resetUser getUser(uid)
       u.chatid << resetedD
 
-    of $acBackup:
-      u.chatid << "not implemented"
+    of $acPromote:
+      let uid = parseInt c.params
+      var u = getUser(uid)
+
+      u.isAdmin = true
+      update u
 
   else:
     u.chatid << youAreNotAdminMyDearD
@@ -107,15 +123,21 @@ proc onUpdate(bot: Telebot, up: Update): Future[bool] {.async, gcsafe.} =
 # --- go
 
 when isMainModule:
-  let 
-    bot = newTeleBot getEnv "TG_BOT_API_KEY"
+  let
     authorId = parseInt getEnv "AUTHOR_CHAT_ID"
+    token = getEnv "TG_BOT_API_KEY"
+    bot = newTeleBot token
+
+  echo "TOKEN: ", token
 
   bot.onCommand("start", startCommandHandler)
   for c in AdminCommand:
     bot.onCommand($c, adminCommandHandler)
 
-  authorId << "start ..."
+  if not fileExists getEnv "DB_HOST":
+    createDB()
+    # TODO add admin [author ID]
+    authorId << "start ..."
 
   bot.onUpdate onUpdate
   bot.poll 300

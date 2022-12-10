@@ -12,7 +12,7 @@ type
     acStats = "stats"
     acAddpoet = "addpoet"
     acReset = "reset"
-    acBackup = "backup"
+    acPromote = "promote"
 
   TextWithButtons*[S: StyledString or string] = object
     text: S

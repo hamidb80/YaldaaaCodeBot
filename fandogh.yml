@@ -11,7 +11,7 @@ spec:
     secret: TG_BOT_API_TOKEN
 
     - name: AUTHOR_CHAT_ID
-    value: "101862091"
+    value: 101862091
     
     - name: DB_HOST
     value: "/mnt/shared-volume/yalda_code_bot.db"

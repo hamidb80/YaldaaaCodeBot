@@ -3,7 +3,7 @@ import std/strformat
 
 type StyledString* = distinct string
 template `$`*(ss: StyledString): untyped = ss.string
-template ss*(s: string): untyped = StyledString s
+func ss*(s: string): StyledString = StyledString s
 
 func bold*(s: string): StyledString = ss fmt"*{s}*"
 func italic*(s: string): StyledString = ss fmt"_{s}_"

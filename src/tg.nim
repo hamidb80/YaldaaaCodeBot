@@ -16,7 +16,7 @@ type
 
   TextWithButtons*[S: StyledString or string] = object
     text: S
-    keyboard: ReplyKeyboardMarkup
+    keyboard: KeyboardMarkup
 
 func `!`(so: Option[string]): string =
   if so.isSome: so.get
@@ -32,19 +32,29 @@ func toReplyKeyboard*(buttons: seq[string]): ReplyKeyboardMarkup =
     result.keyboard.add @[KeyboardButton(text: label)]
 
 func `++`*[S: string or StyledString] (
-    t: S, k: ReplyKeyboardMarkup): TextWithButtons[S] =
+    t: S, k: KeyboardMarkup): TextWithButtons[S] =
 
   TextWithButtons[S](text: t, keyboard: k)
 
 
 # XXX nim has some problems with asyncCheck in except branch, so I use discard await instead
-template `<<`*(chatid: int64, text: string): untyped {.dirty.} =
+
+const md2 = "MarkdownV2"
+
+template `<<`*(chatid: int64, text: string): untyped =
   discard await bot.sendMessage(chatid, text)
 
-template `<<`*(chatid: int64, text: StyledString): untyped {.dirty.} =
-  discard await bot.sendMessage(chatid, text.string, parsemode = "MarkdownV2")
+template `<<`*(chatid: int64, text: StyledString): untyped =
+  discard await bot.sendMessage(chatid, text.string, parsemode = md2)
 
-template `<<`*(chatid: int64, box: TextWithButtons): untyped {.dirty.} =
+template `<<`*[S: string or StyledString](chatid: int64,
+    box: TextWithButtons[S]): untyped =
+
+  const pmode =
+    when S is StyledString: md2
+    else: ""
+
   discard await bot.sendMessage(chatid,
     box.text.string,
+    parsemode = pmode,
     replyMarkup = box.keyboard)

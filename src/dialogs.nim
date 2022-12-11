@@ -1,4 +1,5 @@
-import std/[strutils, sequtils, strformat]
+import std/[strutils, strformat]
+import telebot
 import database, markdownv2, tg
 
 
@@ -62,8 +63,16 @@ const
   """
 
   poetFormatAlertD* = dedent """
-    نوشتار شعر اشتباه است. توجه کنید که باید بین دو مصرع ` *** ` بیاید.
+    نوشتار شعر اشتباه است. توجه کنید که باید بین دو مصرع *** بیاید.
     😓
+  """
+
+  problemNoticeD* = ss dedent """
+    ⭕ *توجه*
+    
+    👆 کاراکتر های \" جزو متن ایمیل نمیباشند
+
+    ✌ در فایل log هم هر خط مربوط به یک الگوی بهم ریختگی است
   """
 
   savedD* = dedent """
@@ -79,6 +88,10 @@ const
   resetedD* = dedent """
     ریست شد
     👍
+  """
+
+  thereIsNoUser* = dedent """
+    کاربر با چنین آیدی در ربات وارد نشده
   """
 
   invalidInputD* = dedent """
@@ -106,6 +119,7 @@ const
 
 let
   problemK* = toReplyKeyboard @[sendMyInputsD, wannaAnswerD]
+  emptyK*: KeyboardMarkup = newReplyKeyboardRemove false
 
 
 func reprStats*(st: Stats): string =
@@ -115,6 +129,14 @@ func reprStats*(st: Stats): string =
     شعر های آزاد: {st.free}
     همه شعر ها: {st.total}
   """
+
+func promoteMsg*(u: database.User): string =
+  const
+    userD = "کاربر"
+    withNameD = "با نام"
+    gotpromotedD = "ترفیع داده شد"
+
+  fmt "{userD} {withNameD} '{u.firstname} {u.lastname}' {gotpromotedD}"
 
 func puzzleEmail*(p: Puzzle): StyledString =
   ss dedent fmt "{bold emailContentD}:\n\"{escapeMarkdownV2 p.shuffled}\""

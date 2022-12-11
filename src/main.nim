@@ -45,7 +45,7 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async
 
       of $acAddpoet:
         if isValidPoet c.params:
-          let p = addPuzzle c.params.strip
+          let p = addPuzzle c.params.strip.replace("\n", " ")
           u.chatid << puzzleEmail p
           u.chatid << savedD
         else:
@@ -58,10 +58,15 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async
 
       of $acPromote:
         let uid = parseInt c.params
-        var u = getUser(uid)
 
-        u.isAdmin = true
-        update u
+        try:
+          var a = getUser(uid)
+          a.isAdmin = true
+          update a
+          u.chatid << promoteMsg a
+
+        except NotFoundError:
+          u.chatid << thereIsNoUser
 
     except ValueError:
       u.chatid << invalidInputD
@@ -85,13 +90,14 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.gcsafe, async.} =
   of usProblem:
     case t
     of wannaAnswerD:
-      u.chatid << doubtSolvedProblemD
+      u.chatid << doubtSolvedProblemD ++ emptyK
       update u, usAnswer
 
     of sendMyInputsD:
       let p = getUserPuzzle u
-      u.chatid << puzzleEmail p
 
+      u.chatid << problemNoticeD
+      u.chatid << puzzleEmail p
       let path = writeTempFile(".log.txt", p.logs)
       discard await bot.sendDocument(u.chatid, "file://" & path,
           caption = "log.txt")
@@ -112,12 +118,12 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.gcsafe, async.} =
           u.chatid << congratsD
           usWon
         else:
-          u.chatid << sorryTryAgainD
+          u.chatid << sorryTryAgainD ++ problemK
           usProblem
 
     else:
       update u, usProblem
-      u.chatid << poetFormatAlertD
+      u.chatid << poetFormatAlertD ++ problemK
 
   of usWon:
     u.chatid << youWonAlreadyD

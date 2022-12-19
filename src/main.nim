@@ -32,7 +32,7 @@ proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async
 
 proc helpCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
   result = true
-  await bot.sendPhoto(c.message.chat.id, "file://" & getCurrentDir() / "assets/help.png")
+  discard await bot.sendPhoto(c.message.chat.id, "file://" & getCurrentDir() / "assets/help.png")
 
 proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
   result = true

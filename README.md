@@ -13,6 +13,8 @@
   - `tg.nim`: extra telegram utilities
   - `markdownv2.nim`: telegram's markdownv2 functionalities
   - `utils.nim`: extra utilities
+  - `peoms_list.nim`: lists poems in database to `play.html`
+  - `poem_getter.nim`: downloads poems from [Ganjoor API](https://api.ganjoor.net/index.html) and save it in database
 - `tests/`
   - `tdb.nim`: test for database
   - `tproblem.nim`: test for problem generator

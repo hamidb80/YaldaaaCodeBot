@@ -109,6 +109,10 @@ proc getUserPuzzle*(u: User): Puzzle =
   result = Puzzle(belongs: some User())
   || db.select(result, "belongs == ?", u)
 
+proc allPuzzles*: seq[Puzzle] =
+  result = @[Puzzle(belongs: some User())]
+  || db.select(result, "1 = 1")
+
 proc addAttempt*(u: User, c: bool): Attempt =
   result = Attempt(user: u, succeed: c, timestamp: now())
   || db.insert result

@@ -3,12 +3,13 @@ import unicode except strip
 import database
 
 func removedAva(s: string): string =
-  ($s.strip.toRunes.filterIt(it notin "ّ،ةء»«َُِۀًٍـ".toRunes)).replace("\U200C", " ")
-  
+  ($s.strip.toRunes.filterIt(it notin "ّةء»«َُِۀًٍـ".toRunes))
+  .replace("\U200C", " ")
+
 
 var client = newHttpClient()
 
-for c in 1..200:
+for c in 1..100:
   try:
     echo c
     let verses =

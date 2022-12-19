@@ -13,7 +13,7 @@ func spoiler*(s: string): StyledString = ss fmt"||{s}||"
 func inlineCode*(s: string): StyledString = ss fmt"`{s}`"
 func codeBlock*(s: string): StyledString = ss fmt "```\n{s}\n```"
 
-func escapeMarkdownV2*(s: string): string =
+func escapemd2*(s: string): string =
     result = newStringOfCap(s.len * 2)
     for c in s:
         if c in "_*[]()~`>#+-=|{}.!\\":

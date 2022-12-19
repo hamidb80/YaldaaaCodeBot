@@ -30,6 +30,10 @@ proc startCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async
   result = true
   await bot.userHey(c.message.chat)
 
+proc helpCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
+  result = true
+  await bot.sendPhoto(c.message.chat.id, "file://" & getCurrentDir() / "assets/help.png")
+
 proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
   result = true
   let u = addOrGetUser extractUserInfo c.message.chat
@@ -151,6 +155,7 @@ when isMainModule:
   # --- register commands
 
   bot.onCommand("start", startCommandHandler)
+  bot.onCommand("help", helpCommandHandler)
   for c in AdminCommand:
     bot.onCommand($c, adminCommandHandler)
 

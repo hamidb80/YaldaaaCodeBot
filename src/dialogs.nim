@@ -139,7 +139,7 @@ func promoteMsg*(u: database.User): string =
   fmt "{userD} {withNameD} '{u.firstname} {u.lastname}' {gotpromotedD}"
 
 func puzzleEmail*(p: Puzzle): StyledString =
-  ss dedent fmt "{bold emailContentD}:\n\"{escapeMarkdownV2 p.shuffled}\""
+  ss dedent fmt "{bold emailContentD}:\n\"{escapemd2 p.shuffled}\""
 
 func isValidPoet*(sentence: string): bool =
   "***" in sentence

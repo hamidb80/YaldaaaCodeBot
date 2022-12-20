@@ -12,6 +12,11 @@ const
     👩‍💻
   """
 
+  problemDescWhereD* = dedent """
+    سوالو اینجا بخون 👇👇
+    https://ceshahed.github.io/
+  """
+
   youAreNotAdminMyDearD* = dedent """
     عزیزم شما ادمین نیستی
     😠

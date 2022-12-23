@@ -150,8 +150,6 @@ proc onUpdate(bot: Telebot, up: Update): Future[bool] {.gcsafe, async.} =
 
 # --- go
 
-# TODO send photos and docs with `<@` infix
-
 when isMainModule:
   let
     authorId = parseInt getEnv "AUTHOR_CHAT_ID"

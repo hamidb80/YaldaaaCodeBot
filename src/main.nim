@@ -61,7 +61,10 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async
 
       of $acWinners:
         for w in getWinners():
-          w.chatid << winnerSendMeD
+          try:
+            w.chatid << winnerSendMeD
+          except:
+            discard
 
       of $acReset:
         let uid = parseInt c.params

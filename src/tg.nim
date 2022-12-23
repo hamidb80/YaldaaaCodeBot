@@ -1,4 +1,4 @@
-import std/[options]
+import std/[options, os, strutils]
 import telebot, telebot/private/types
 import markdownv2
 
@@ -41,6 +41,25 @@ func `++`*[S: string or StyledString] (
 # XXX nim has some problems with asyncCheck in except branch, so I use discard await instead
 
 const md2 = "MarkdownV2"
+
+type FileType = enum
+  ftDocument
+  ftPicture
+
+func fileType(path: string): FileType =
+  case path.splitFile.ext.toLowerAscii
+  of ".png", ".jpg": ftPicture
+  else: ftDocument
+
+proc staticFileAddr*(path: string): string =
+  "file://" & getCurrentDir() / path
+
+template `<@`*(chatid: int64, data: tuple[path, text: string]): untyped =
+  case fileType(data[0])
+  of ftDocument:
+    discard await bot.sendDocument(chatid, data[0], caption = data[1])
+  of ftPicture:
+    discard await bot.sendPhoto(chatid, data[0], caption = data[1])
 
 template `<<`*(chatid: int64, text: string): untyped =
   discard await bot.sendMessage(chatid, text)

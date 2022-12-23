@@ -36,7 +36,7 @@ proc problemCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, asy
 
 proc helpCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
   result = true
-  discard await bot.sendPhoto(c.message.chat.id, "file://" & getCurrentDir() / "assets/help.png")
+  c.message.chat.id <@ (staticFileAddr "assets/help.png", "")
 
 proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async.} =
   result = true
@@ -114,8 +114,7 @@ proc onMessage(bot: Telebot, m: Message): Future[bool] {.gcsafe, async.} =
       u.chatid << problemNoticeD
       u.chatid << puzzleEmail p
       let path = writeTempFile(".log.txt", p.logs)
-      discard await bot.sendDocument(u.chatid, "file://" & path,
-          caption = "log.txt")
+      u.chatid <@ ("file://" & path, "log.txt")
 
     else:
       u.chatid << invalidInputD

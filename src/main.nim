@@ -59,6 +59,10 @@ proc adminCommandHandler(bot: Telebot, c: Command): Future[bool] {.gcsafe, async
         else:
           u.chatid << poetFormatAlertD
 
+      of $acWinners:
+        for w in getWinners():
+          w.chatid << winnerSendMeD
+
       of $acReset:
         let uid = parseInt c.params
         resetUser getUser(uid)

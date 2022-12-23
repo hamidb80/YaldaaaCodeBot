@@ -113,6 +113,10 @@ proc allPuzzles*: seq[Puzzle] =
   result = @[Puzzle(belongs: some User())]
   || db.select(result, "1 = 1")
 
+proc getWinners*: seq[User] =
+  result = @[User()]
+  || db.select(result, "state = ?", usWon)
+
 proc addAttempt*(u: User, c: bool): Attempt =
   result = Attempt(user: u, succeed: c, timestamp: now())
   || db.insert result
@@ -120,7 +124,7 @@ proc addAttempt*(u: User, c: bool): Attempt =
 proc getStats*: Stats =
   withDb:
     result.users = db.count(User)
-    result.answered = db.count(User, "*", false, "state == ?", usWon.int)
+    result.answered = db.count(User, "*", false, "state == ?", usWon)
     result.free = db.count(Puzzle, "*", false, "belongs IS NULL")
     result.total = db.count(Puzzle)
 
